@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="异步模块模式-AMD(Asynchronous Module Definition): 请求发出后，继续其他业务逻辑，直到模块加载完成执行后续的逻辑，实现模块开发中对模块加载完成后的引用。">
+<meta name="keywords" content="读书笔记,架构型设计模式,异步模块模式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript设计模式-异步模块模式">
+<meta property="og:url" content="http://guoooofu.github.io/2018/08/06/AMD/index.html">
+<meta property="og:site_name" content="guoooofu blog">
+<meta property="og:description" content="异步模块模式-AMD(Asynchronous Module Definition): 请求发出后，继续其他业务逻辑，直到模块加载完成执行后续的逻辑，实现模块开发中对模块加载完成后的引用。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-08-06T22:50:28.754Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JavaScript设计模式-异步模块模式">
+<meta name="twitter:description" content="异步模块模式-AMD(Asynchronous Module Definition): 请求发出后，继续其他业务逻辑，直到模块加载完成执行后续的逻辑，实现模块开发中对模块加载完成后的引用。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://guoooofu.github.io/2018/08/06/AMD/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>JavaScript设计模式-异步模块模式 | guoooofu blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">guoooofu blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/blog/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签<span class="badge">48</span></a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类<span class="badge">4</span></a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/blog/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档<span class="badge">40</span></a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-schedule">
+    <a href="/blog/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br />日程表</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-sitemap">
+    <a href="/blog/sitemap.xml" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />站点地图</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://guoooofu.github.io/blog/2018/08/06/AMD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="guoooofu">
+      <meta itemprop="description" content="Invent yourself, and then reinvent yourself.">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/22878237?s=400&u=8f77d8473aeadf83ecf3b99990f1a52a68d06d2e&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="guoooofu blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JavaScript设计模式-异步模块模式
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-08-06 21:22:52" itemprop="dateCreated datePublished" datetime="2018-08-06T21:22:52+08:00">2018-08-06</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-08-07 06:50:28" itemprop="dateModified" datetime="2018-08-07T06:50:28+08:00">2018-08-07</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/JavaScript设计模式/" itemprop="url" rel="index"><span itemprop="name">JavaScript设计模式</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2018/08/06/AMD/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/blog/2018/08/06/AMD/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>异步模块模式-AMD(Asynchronous Module Definition): 请求发出后，继续其他业务逻辑，直到模块加载完成执行后续的逻辑，实现模块开发中对模块加载完成后的引用。</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义模块管理器单体对象</span></span><br><span class="line"><span class="keyword">var</span> F = F || &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 创建或调用模块方法</span></span><br><span class="line"><span class="comment"> * @param url &#123;String&#125; 模块url</span></span><br><span class="line"><span class="comment"> * @param deps &#123;String&#125; 依赖模块</span></span><br><span class="line"><span class="comment"> * @param callback &#123;Function&#125; 模块主函数</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">F.module = <span class="function"><span class="keyword">function</span> (<span class="params">url, modDeps, modCallback</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 将参数转化为数组</span></span><br><span class="line">  <span class="keyword">var</span> args = [].slice.call(<span class="built_in">arguments</span>)</span><br><span class="line">  <span class="comment">// 获取模块构造函数（参数数组中最后一个参数成员）</span></span><br><span class="line">  <span class="keyword">var</span> callback = args.pop()</span><br><span class="line">  <span class="comment">// 获取依赖模块（紧邻回调函数参数，且数据类型为数组）</span></span><br><span class="line">  <span class="keyword">var</span> deps = (args.length &amp;&amp; args[args.length - <span class="number">1</span>] <span class="keyword">instanceof</span> <span class="built_in">Array</span>) ? args.pop() : []</span><br><span class="line">  <span class="comment">// 该模块 url（模块 ID）</span></span><br><span class="line">  <span class="keyword">var</span> url = args.length ? args.pop() : <span class="literal">null</span></span><br><span class="line">  <span class="comment">// 依赖模块序列</span></span><br><span class="line">  <span class="keyword">var</span> params = []</span><br><span class="line">  <span class="comment">// 未加载的依赖模块数量统计</span></span><br><span class="line">  <span class="keyword">var</span> depsCount = <span class="number">0</span></span><br><span class="line">  <span class="comment">// 依赖模块序列中索引值</span></span><br><span class="line">  <span class="keyword">var</span> i = <span class="number">0</span></span><br><span class="line">  <span class="comment">// 依赖模块序列长度</span></span><br><span class="line">  <span class="keyword">var</span> len</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (len = deps.length) &#123;</span><br><span class="line">    <span class="keyword">while</span> (i &lt; len) &#123;</span><br><span class="line">      <span class="comment">// 闭包保存 i</span></span><br><span class="line">      (<span class="function"><span class="keyword">function</span>(<span class="params">i</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 增加未加载依赖模块数量统计</span></span><br><span class="line">        depsCount++</span><br><span class="line">        <span class="comment">// 异步加载依赖模块</span></span><br><span class="line">        loadModule(deps[i], <span class="function"><span class="keyword">function</span> (<span class="params">mod</span>) </span>&#123;</span><br><span class="line">          <span class="comment">// 依赖模块序列中添加依赖模块接口引用</span></span><br><span class="line">          params[i] = mod</span><br><span class="line">          <span class="comment">// 依赖模块加载完成，依赖模块数量统计减一</span></span><br><span class="line">          depsCount--</span><br><span class="line">          <span class="comment">// 如果依赖模块全部加载</span></span><br><span class="line">          <span class="keyword">if</span> (depsCount === <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 在模块缓存器中矫正该模块，并执行构造函数</span></span><br><span class="line">            setModule(url, params, callback)</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">      &#125;)(i)</span><br><span class="line">      <span class="comment">// 遍历下一依赖模块</span></span><br><span class="line">      i++</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">// 无依赖模块，直接执行回调函数</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 在模块中缓存器中矫正该模块，并执行构造函数</span></span><br><span class="line">    setModule(url, [], callback)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 模块缓存器</span></span><br><span class="line">  <span class="keyword">var</span> moduleCache = &#123;&#125;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 设置模块并执行模块构造函数</span></span><br><span class="line"><span class="comment">   * @param moduleName &#123;String&#125; 模块路径(id)</span></span><br><span class="line"><span class="comment">   * @param params &#123;Array&#125; 依赖模块</span></span><br><span class="line"><span class="comment">   * @param callback &#123;Function&#125; 模块加载完成回调函数</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">var</span> setModule = <span class="function"><span class="keyword">function</span> (<span class="params">moduleName, params, callback</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 模块容器</span></span><br><span class="line">    <span class="keyword">var</span> _module</span><br><span class="line">    <span class="comment">// 模块文件加载完成回调函数</span></span><br><span class="line">    <span class="keyword">var</span> fn</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果模块被调用过</span></span><br><span class="line">    <span class="keyword">if</span> (moduleCache[moduleName]) &#123;</span><br><span class="line">      <span class="comment">// 获取模块</span></span><br><span class="line">      _module = moduleCache[moduleName]</span><br><span class="line">      <span class="comment">// 设置模块已经加载完成</span></span><br><span class="line">      _module.status = <span class="string">'loaded'</span></span><br><span class="line">      <span class="comment">// 矫正模块接口</span></span><br><span class="line">      _module.exports = callback ? callback.apply(_module, params) : <span class="literal">null</span></span><br><span class="line">      <span class="comment">// 执行模块文件加载完成回调函数</span></span><br><span class="line">      <span class="keyword">while</span>(fn = _module.onload.shift()) &#123;</span><br><span class="line">        fn(_module.exports)</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="comment">// 模块不存在(匿名模块)</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 直接执行构造函数</span></span><br><span class="line">      callback &amp;&amp; callback.apply(<span class="literal">null</span>, params)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 异步加载依赖模块所在文件</span></span><br><span class="line"><span class="comment">   * @param moduleName &#123;String&#125; 模块路径(id)</span></span><br><span class="line"><span class="comment">   * @param callback &#123;Function&#125; 模块加载完成回调函数</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">var</span> loadModule = <span class="function"><span class="keyword">function</span> (<span class="params">moduleName, callback</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 依赖模块</span></span><br><span class="line">    <span class="keyword">var</span> _module</span><br><span class="line">    <span class="keyword">if</span> (moduleCache[_module]) &#123;</span><br><span class="line">      <span class="comment">// 获取该模块信息</span></span><br><span class="line">      _module = moduleCache[moduleName]</span><br><span class="line">      _module.status = <span class="string">'loaded'</span></span><br><span class="line">        ? setTimeout(callback(_module.exports), <span class="number">0</span>)  <span class="comment">// 执行模块加载完成回调函数</span></span><br><span class="line">        : _module.onload.push(callback) <span class="comment">// 缓存该模块所处文件加载完成回调函数</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 缓存该模块初始化信息</span></span><br><span class="line">      moduleCache[moduleName] = &#123;</span><br><span class="line">        moduleName: moduleName, <span class="comment">// 模块 id</span></span><br><span class="line">        status: <span class="string">'loading'</span>,  <span class="comment">// 模块对应文件加载状态(默认加载中)</span></span><br><span class="line">        exports: <span class="literal">null</span>,  <span class="comment">// 模块接口</span></span><br><span class="line">        onload: [callback]  <span class="comment">//  模块对应文件加载完成时回调函数缓冲器</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 加载模块对应文件</span></span><br><span class="line">      loadScript(getUrl(moduleName))</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 获取文件路径</span></span><br><span class="line">  <span class="keyword">var</span> getUrl = <span class="function"><span class="keyword">function</span> (<span class="params">moduleName</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 拼接完整的文件路径字符串，如'lib/ajax' =&gt; 'lib/ajax.js'</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">String</span>(moduleName).replace(<span class="regexp">/\.js$/g</span>, <span class="string">''</span>) + <span class="string">'.js'</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 加载脚本文件</span></span><br><span class="line">  <span class="keyword">var</span> loadScript = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 创建 script 元素</span></span><br><span class="line">    <span class="keyword">var</span> _script = <span class="built_in">document</span>.createElement(<span class="string">'script'</span>)</span><br><span class="line">    _script.type = <span class="string">'text/JavaScript'</span>  <span class="comment">// 文件类型</span></span><br><span class="line">    _script.charset = <span class="string">'UTF-8'</span> <span class="comment">// 确认编码</span></span><br><span class="line">    _script.async = <span class="literal">true</span>  <span class="comment">// 异步加载</span></span><br><span class="line">    _script.src = src <span class="comment">// 文件路径</span></span><br><span class="line">    <span class="built_in">document</span>.getElementsByTagName(<span class="string">'head'</span>)[<span class="number">0</span>].appendChild(_script) <span class="comment">// 插入页面中</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 测试</span></span><br><span class="line"><span class="comment">// 定义 dom 模块，它不依赖任何其他模块</span></span><br><span class="line">F.module(<span class="string">'lib/dom'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    g: <span class="function"><span class="keyword">function</span> (<span class="params">id</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="built_in">document</span>.getElementById(id)</span><br><span class="line">    &#125;,</span><br><span class="line">    html: <span class="function"><span class="keyword">function</span> (<span class="params">id, html</span>) </span>&#123;</span><br><span class="line">      html ? <span class="keyword">this</span>.g(id).innerHTML = html : <span class="keyword">return</span> <span class="keyword">this</span>.g(id).innerHTML</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="comment">// 定义 event 模块，它依赖于 dom 模块</span></span><br><span class="line">F.module(<span class="string">'lib/event'</span>, [<span class="string">'lib/dom'</span>], <span class="function"><span class="keyword">function</span> (<span class="params">dom</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> events = &#123;</span><br><span class="line">    on: <span class="function"><span class="keyword">function</span> (<span class="params">id, type, fn</span>) </span>&#123;</span><br><span class="line">      dom.g(id)[<span class="string">'on'</span> + type] = fn</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在 index.html 页面中引用 dom 和 event 模块，为页面中的  button 绑定事件</span></span><br><span class="line">F.module(<span class="string">'[lib/evetn, lib/dom]'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">events, dom</span>) </span>&#123;</span><br><span class="line">  events.on(<span class="string">'demo'</span>, <span class="string">'click'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    dom.html(<span class="string">'deom'</span>, <span class="string">'success'</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h2><ul>
+<li>异步模块模式在模块化的基础上增加了依赖模块，使开发者不必担心某些方法尚未加载或未加载完全造成的无法使用的问题</li>
+<li>异步加载部分功能也可以将更多首屏不必要的功能玻璃出去，减少首屏加载成本</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li>《JavaScript设计模式》 – 张瑞铭</li>
+</ul>
+<p><strong>本文作者</strong>：guoooofu<br><strong>本文地址</strong>： <a href="http://guoooofu.github.io/2018/08/06/AMD/">http://guoooofu.github.io/2018/08/06/AMD/</a> <br><strong>版权声明</strong>：转载给我留个原文链接就行啦</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>真诚赞赏，手留余香</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="http://op7iut28v.bkt.clouddn.com/image/png/wechat-qcode.png" alt="guoooofu 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="http://op7iut28v.bkt.clouddn.com/image/png/alipay-qcode.png" alt="guoooofu 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/读书笔记/" rel="tag"># 读书笔记</a>
+          
+            <a href="/blog/tags/架构型设计模式/" rel="tag"># 架构型设计模式</a>
+          
+            <a href="/blog/tags/异步模块模式/" rel="tag"># 异步模块模式</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2018/08/05/SMD/" rel="next" title="JavaScript设计模式-同步模块模式">
+                <i class="fa fa-chevron-left"></i> JavaScript设计模式-同步模块模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2018/08/08/widget/" rel="prev" title="JavaScript设计模式-Widget模式">
+                JavaScript设计模式-Widget模式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://avatars3.githubusercontent.com/u/22878237?s=400&u=8f77d8473aeadf83ecf3b99990f1a52a68d06d2e&v=4"
+                alt="guoooofu" />
+            
+              <p class="site-author-name" itemprop="name">guoooofu</p>
+              <p class="site-description motion-element" itemprop="description">Invent yourself, and then reinvent yourself.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives/">
+                
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/guoooofu" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:m13224597763@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#示例"><span class="nav-number">1.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优点"><span class="nav-number">2.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">guoooofu</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'guoooofu',
+            repo: 'https://github.com/guoooofu/blog',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: 'b5a0e40c9f0d21b36834b5e3d5a5abb9075d4738',
+            
+                client_id: '397a57eb4531371d5571'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/js.cookie.js?v=6.3.0"></script>
+  <script type="text/javascript" src="/blog/js/src/scroll-cookie.js?v=6.3.0"></script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

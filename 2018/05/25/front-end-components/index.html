@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="组件封装有一定的不确定性，更多时候是在做几个方面的权衡，并且在业务不断变化中，可能还会面临一些调整和重构。为了编写出更优秀的前端组件，通过网上的文章结合自身开发时的一些经验(有重合)，在此做个总结">
+<meta name="keywords" content="前端组件,组件化设计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前端组件设计原则">
+<meta property="og:url" content="http://guoooofu.github.io/2018/05/25/front-end-components/index.html">
+<meta property="og:site_name" content="guoooofu blog">
+<meta property="og:description" content="组件封装有一定的不确定性，更多时候是在做几个方面的权衡，并且在业务不断变化中，可能还会面临一些调整和重构。为了编写出更优秀的前端组件，通过网上的文章结合自身开发时的一些经验(有重合)，在此做个总结">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://static.imys.net/no-status-component.jpg">
+<meta property="og:image" content="http://static.imys.net/end-to-end-component.jpg">
+<meta property="og:image" content="http://static.imys.net/service-component.jpg">
+<meta property="og:image" content="http://static.imys.net/container-component.jpg">
+<meta property="og:image" content="http://static.imys.net/module-and-components.jpg">
+<meta property="og:updated_time" content="2018-07-07T05:15:01.967Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前端组件设计原则">
+<meta name="twitter:description" content="组件封装有一定的不确定性，更多时候是在做几个方面的权衡，并且在业务不断变化中，可能还会面临一些调整和重构。为了编写出更优秀的前端组件，通过网上的文章结合自身开发时的一些经验(有重合)，在此做个总结">
+<meta name="twitter:image" content="http://static.imys.net/no-status-component.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="http://guoooofu.github.io/2018/05/25/front-end-components/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>前端组件设计原则 | guoooofu blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">guoooofu blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/blog/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签<span class="badge">48</span></a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类<span class="badge">4</span></a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/blog/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档<span class="badge">40</span></a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-schedule">
+    <a href="/blog/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br />日程表</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-sitemap">
+    <a href="/blog/sitemap.xml" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />站点地图</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://guoooofu.github.io/blog/2018/05/25/front-end-components/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="guoooofu">
+      <meta itemprop="description" content="Invent yourself, and then reinvent yourself.">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/22878237?s=400&u=8f77d8473aeadf83ecf3b99990f1a52a68d06d2e&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="guoooofu blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">前端组件设计原则
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-25 19:57:44" itemprop="dateCreated datePublished" datetime="2018-05-25T19:57:44+08:00">2018-05-25</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-07-07 13:15:01" itemprop="dateModified" datetime="2018-07-07T13:15:01+08:00">2018-07-07</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/前端组件化开发/" itemprop="url" rel="index"><span itemprop="name">前端组件化开发</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2018/05/25/front-end-components/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/blog/2018/05/25/front-end-components/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>组件封装有一定的不确定性，更多时候是在做几个方面的权衡，并且在业务不断变化中，可能还会面临一些调整和重构。<br>为了编写出更优秀的前端组件，通过网上的文章结合自身开发时的一些经验(有重合)，在此做个总结<br><a id="more"></a></p>
+<h2 id="组件的特点"><a href="#组件的特点" class="headerlink" title="组件的特点"></a>组件的特点</h2><ul>
+<li>可复用的模块，完成既定功能</li>
+<li>有明确的接口规定</li>
+<li>有上下文依赖、外部依赖资源的定义</li>
+<li>可独立发布</li>
+</ul>
+<h2 id="组件化开发的优点"><a href="#组件化开发的优点" class="headerlink" title="组件化开发的优点"></a>组件化开发的优点</h2><ul>
+<li>能更有效的对代码进行组合，实现对代码的分层</li>
+<li>能够对资源进行重组和优化，实现更合理的管理项目资源</li>
+<li>有利于单元测试</li>
+<li>有利于重构</li>
+</ul>
+<h2 id="组件与模块的区别"><a href="#组件与模块的区别" class="headerlink" title="组件与模块的区别"></a>组件与模块的区别</h2><p>  模块：通常强调的是职责（分离、内聚）<br>  组件：是可复用模块和相关依赖的封装</p>
+<h2 id="组件职责划分"><a href="#组件职责划分" class="headerlink" title="组件职责划分"></a>组件职责划分</h2><blockquote>
+<p>一个组件只做一件事，基于功能做好职责划分。</p>
+</blockquote>
+<h3 id="无状态组件"><a href="#无状态组件" class="headerlink" title="无状态组件"></a>无状态组件</h3><p>无状态组件: 只是单纯的接受数据渲染 DOM，没有生命周期等额外的概念。<br><img src="http://static.imys.net/no-status-component.jpg" alt="无状态组件"></p>
+<h3 id="端对端组件"><a href="#端对端组件" class="headerlink" title="端对端组件"></a>端对端组件</h3><p>端对端组件: 指的是不需要依赖外部给予，自身就可以负责从数据获取到展示过程的组件。<br><img src="http://static.imys.net/end-to-end-component.jpg" alt="端对端组件"></p>
+<h3 id="UI-组件"><a href="#UI-组件" class="headerlink" title="UI 组件"></a>UI 组件</h3><p>UI 组件：UI 组件指的是界面扩展类组件，比如：输入框、表格、树、下拉框等。  </p>
+<p>特点是：复用性强，只通过 <code>props</code>、<code>events</code> 和 <code>slots</code> 等组件接口与外部通信。<br>更像是一个对 HTML 的扩展标签。</p>
+<h3 id="业务组件"><a href="#业务组件" class="headerlink" title="业务组件"></a>业务组件</h3><p>业务组件：通常是根据最小业务状态抽象而出，有些业务组件也具有一定的复用性，但大多数是一次性组件。  </p>
+<p>数据来源：</p>
+<ul>
+<li><code>props</code></li>
+<li><code>global state</code><br><img src="http://static.imys.net/service-component.jpg" alt="业务组件"></li>
+</ul>
+<h3 id="容器组件"><a href="#容器组件" class="headerlink" title="容器组件"></a>容器组件</h3><p>容器组件: 就是一个盒子，一般当作一个业务子模块的入口，比如一个路由指向的组件。  </p>
+<p>特点：</p>
+<ul>
+<li>容器组件内的子组件通常具有业务或数据依赖关系。</li>
+<li>如果没有使用全局状态管理，那么容器组件就是负责通过 <code>props</code> 分发数据到各个子组件，在通过 <code>events</code> 处理各个子组件的业务响应。此时容器组件需要做数据请求工作。</li>
+<li>如果使用了全局状态管理，那么容器内部的业务组件可以自行调用全局状态处理业务。但并不是说此时容器组件什么都不用干了。即使不需要请求数据，还是有许多组件间或一个业务模块内的诸多统筹工作要做。<br><img src="http://static.imys.net/container-component.jpg" alt="容器组件"></li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">moduleA</span>&gt;</span><span class="tag">&lt;/<span class="name">moduleA</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">moduleB</span>&gt;</span><span class="tag">&lt;/<span class="name">moduleB</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">moduleC</span>&gt;</span><span class="tag">&lt;/<span class="name">moduleC</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="业务模块"><a href="#业务模块" class="headerlink" title="业务模块"></a>业务模块</h3><p>把上面的各类组件组装到一起就组成一个业务模块。<br><img src="http://static.imys.net/module-and-components.jpg" alt="业务模块"></p>
+<h2 id="组件设计原则"><a href="#组件设计原则" class="headerlink" title="组件设计原则"></a>组件设计原则</h2><h3 id="尽可能的减少状态"><a href="#尽可能的减少状态" class="headerlink" title="尽可能的减少状态"></a>尽可能的减少状态</h3><ul>
+<li>如果一个数据可以由另一个 <code>state</code> 变换得到，那么这个数据就不是一个 <code>state</code>。只需要写一个变换的处理函数，在 <code>Vue</code> 中可以使用计算属性。</li>
+<li>不要重复自己。如果你的 <code>state</code> 是一个数组，而模版最外层是渲染这个数组，那么你需要做的事是把渲染的项作为一个组件，只接受一个单级对象形式的数据，由外部决定这个组件的展示次数。</li>
+<li>如果一个数据是固定的，不会变化的常量，那么这个数据就如同 HTML 固定的站点标题一样，写死或作为全局配置属性等，不属于 state。</li>
+<li>如果一个数据需要从外部得到，它应该属于 props。</li>
+<li>如果组件和兄弟组件拥有相同的 <code>state</code>，那么这个 <code>state</code> 应该放到更高的层级中，使用 <code>props</code> 传递到两个组件中。</li>
+</ul>
+<h3 id="合理的依赖关系"><a href="#合理的依赖关系" class="headerlink" title="合理的依赖关系"></a>合理的依赖关系</h3><ul>
+<li>父组件不依赖子组件。要做到当我们把子组件删除后，只是丢失了一个功能，或一个模块等，而不会造成父组件及兄弟组件功能异常。</li>
+<li>子组件基于父组件传递 <code>props</code> 作出个性化展示。</li>
+</ul>
+<h3 id="扁平化参数"><a href="#扁平化参数" class="headerlink" title="扁平化参数"></a>扁平化参数</h3><p>像 <code>HTML</code> 原生元素那样，只接受原始类型（字符串、数值、布尔值和函数）作为属性，避免复杂的对象。当然，数据除外。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- good --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">my-component</span></span></span><br><span class="line"><span class="tag">  <span class="attr">label</span>=<span class="string">"hello"</span></span></span><br><span class="line"><span class="tag">  <span class="attr">:actived</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">  <span class="attr">:width</span>=<span class="string">"600"</span></span></span><br><span class="line"><span class="tag">  <span class="attr">:on-show</span>=<span class="string">"show"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">my-component</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- bad --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">my-component</span> <span class="attr">:config</span>=<span class="string">"myConfig"</span>&gt;</span><span class="tag">&lt;/<span class="name">my-component</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="良好的接口设计"><a href="#良好的接口设计" class="headerlink" title="良好的接口设计"></a>良好的接口设计</h3><ul>
+<li>把组件内部可以完成的工作做到极致。虽然提倡拥抱变化，但接口不是越多越好。</li>
+<li>如果常量变为 props 能应对更多的场景，那么就可以作为 props。原有的常量可作为默认值。</li>
+<li>如果组件不能提供调用者所需求的功能，那么这个组件的接口还不够完善。</li>
+<li>如果需要为了某一调用者编写大量特定需求的代码，那么可以考虑通过扩展等方式构建一个新的组件。</li>
+<li>保证组件的属性和事件足够的给大多数的组件使用。</li>
+</ul>
+<h2 id="设计组件前自省几个问题"><a href="#设计组件前自省几个问题" class="headerlink" title="设计组件前自省几个问题"></a>设计组件前自省几个问题</h2><h3 id="这个组件是否有必要再分？"><a href="#这个组件是否有必要再分？" class="headerlink" title="这个组件是否有必要再分？"></a>这个组件是否有必要再分？</h3><p>组件划分的依据通常是 业务逻辑、功能，要考虑各组件之间的关系是否明确（如组件树方式管理组件间依赖关系，兄弟组件不可见），以及组件的可复用度。<br>划分粒度的大小需要根据实际情况权衡，太小会提升维护成本，太大又不够灵活和高复用性。</p>
+<p>每一个组件都应该有其独特的划分目的的，有的是为了复用实现，有的是为了封装复杂度清晰业务实现。</p>
+<h3 id="这个组件的依赖是否可再缩减？"><a href="#这个组件的依赖是否可再缩减？" class="headerlink" title="这个组件的依赖是否可再缩减？"></a>这个组件的依赖是否可再缩减？</h3><p>缩减组件依赖可以提高组件的可复用度，常用的方法是IoC（依赖注入），对外弱类型依赖。</p>
+<h3 id="这个组件是否对其他组件造成侵入？"><a href="#这个组件是否对其他组件造成侵入？" class="headerlink" title="这个组件是否对其他组件造成侵入？"></a>这个组件是否对其他组件造成侵入？</h3><p>一个组件的封装性不够，或者自身越界操作，就可能对自身之外造成了侵入，这种情况应该尽量避免，确保组件的生命周期能够对其影响进行有效的管理（如 <code>destroy</code> 后不留痕迹）。<br>较常见的一种情况是：组件运行时对 <code>window</code> 对象添加 <code>resize</code> 监听事件以实现组件响应视窗尺寸变化事件，这种需求的更好替代方案是：组件提供刷新方法，由父组件实现调用（最终由根组件统一处理）。</p>
+<p>次优的方案是，当组件 <code>destroy</code> 前清理恢复。</p>
+<p>一个组件不应对其它兄弟组件造成直接影响。</p>
+<h3 id="这个组件可否复用于其它类似场景中？"><a href="#这个组件可否复用于其它类似场景中？" class="headerlink" title="这个组件可否复用于其它类似场景中？"></a>这个组件可否复用于其它类似场景中？</h3><p>需要考虑需要适用的不同场景，在组件接口设计时进行必要的兼容。</p>
+<h3 id="这个组件当别人用时，会怎么想？"><a href="#这个组件当别人用时，会怎么想？" class="headerlink" title="这个组件当别人用时，会怎么想？"></a>这个组件当别人用时，会怎么想？</h3><p>接口设计符合规范和大众习惯，尽量让别人用起来简单易上手，易上手是指更符合直觉。</p>
+<h3 id="假如业务需要不需要这个功能，是否方便清除？"><a href="#假如业务需要不需要这个功能，是否方便清除？" class="headerlink" title="假如业务需要不需要这个功能，是否方便清除？"></a>假如业务需要不需要这个功能，是否方便清除？</h3><p>各组件之前以组合的关系互相配合，也是对功能需求的模块化抽象，当需求变化时可以将实现以模块粒度进行调整。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="http://ijser.cn/2017-06-25-web-component-design-in-front-end/" target="_blank" rel="noopener">前端组件化设计思路</a></li>
+<li><a href="https://imys.net/20170317/write-good-front-end-component.html#%E7%BB%84%E4%BB%B6%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99" target="_blank" rel="noopener">编写良好的前端组件</a></li>
+</ul>
+<p><strong>本文作者</strong>：guoooofu<br><strong>本文地址</strong>： <a href="http://guoooofu.github.io/2018/05/25/front-end-components/">http://guoooofu.github.io/2018/05/25/front-end-components/</a> <br><strong>版权声明</strong>：转载给我留个原文链接就行啦</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>真诚赞赏，手留余香</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="http://op7iut28v.bkt.clouddn.com/image/png/wechat-qcode.png" alt="guoooofu 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="http://op7iut28v.bkt.clouddn.com/image/png/alipay-qcode.png" alt="guoooofu 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/前端组件/" rel="tag"># 前端组件</a>
+          
+            <a href="/blog/tags/组件化设计/" rel="tag"># 组件化设计</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2018/05/10/best-practices-for-judging-data-types/" rel="next" title="探索JavaScript判断数据类型的最佳实践">
+                <i class="fa fa-chevron-left"></i> 探索JavaScript判断数据类型的最佳实践
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2018/06/02/javascript-design-patterns/" rel="prev" title="学习Javascript设计模式">
+                学习Javascript设计模式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://avatars3.githubusercontent.com/u/22878237?s=400&u=8f77d8473aeadf83ecf3b99990f1a52a68d06d2e&v=4"
+                alt="guoooofu" />
+            
+              <p class="site-author-name" itemprop="name">guoooofu</p>
+              <p class="site-description motion-element" itemprop="description">Invent yourself, and then reinvent yourself.</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives/">
+                
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">48</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/guoooofu" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:m13224597763@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#组件的特点"><span class="nav-number">1.</span> <span class="nav-text">组件的特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件化开发的优点"><span class="nav-number">2.</span> <span class="nav-text">组件化开发的优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件与模块的区别"><span class="nav-number">3.</span> <span class="nav-text">组件与模块的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件职责划分"><span class="nav-number">4.</span> <span class="nav-text">组件职责划分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#无状态组件"><span class="nav-number">4.1.</span> <span class="nav-text">无状态组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#端对端组件"><span class="nav-number">4.2.</span> <span class="nav-text">端对端组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UI-组件"><span class="nav-number">4.3.</span> <span class="nav-text">UI 组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#业务组件"><span class="nav-number">4.4.</span> <span class="nav-text">业务组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容器组件"><span class="nav-number">4.5.</span> <span class="nav-text">容器组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#业务模块"><span class="nav-number">4.6.</span> <span class="nav-text">业务模块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件设计原则"><span class="nav-number">5.</span> <span class="nav-text">组件设计原则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#尽可能的减少状态"><span class="nav-number">5.1.</span> <span class="nav-text">尽可能的减少状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#合理的依赖关系"><span class="nav-number">5.2.</span> <span class="nav-text">合理的依赖关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#扁平化参数"><span class="nav-number">5.3.</span> <span class="nav-text">扁平化参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#良好的接口设计"><span class="nav-number">5.4.</span> <span class="nav-text">良好的接口设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设计组件前自省几个问题"><span class="nav-number">6.</span> <span class="nav-text">设计组件前自省几个问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#这个组件是否有必要再分？"><span class="nav-number">6.1.</span> <span class="nav-text">这个组件是否有必要再分？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#这个组件的依赖是否可再缩减？"><span class="nav-number">6.2.</span> <span class="nav-text">这个组件的依赖是否可再缩减？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#这个组件是否对其他组件造成侵入？"><span class="nav-number">6.3.</span> <span class="nav-text">这个组件是否对其他组件造成侵入？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#这个组件可否复用于其它类似场景中？"><span class="nav-number">6.4.</span> <span class="nav-text">这个组件可否复用于其它类似场景中？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#这个组件当别人用时，会怎么想？"><span class="nav-number">6.5.</span> <span class="nav-text">这个组件当别人用时，会怎么想？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#假如业务需要不需要这个功能，是否方便清除？"><span class="nav-number">6.6.</span> <span class="nav-text">假如业务需要不需要这个功能，是否方便清除？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">guoooofu</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'guoooofu',
+            repo: 'https://github.com/guoooofu/blog',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: 'b5a0e40c9f0d21b36834b5e3d5a5abb9075d4738',
+            
+                client_id: '397a57eb4531371d5571'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/js.cookie.js?v=6.3.0"></script>
+  <script type="text/javascript" src="/blog/js/src/scroll-cookie.js?v=6.3.0"></script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
